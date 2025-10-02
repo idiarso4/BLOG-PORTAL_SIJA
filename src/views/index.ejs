@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<%- include('./partials/header', {
+  title: title,
+  description: description,
+  user,
+  activeNav: 'home'
+}) %>
+
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 100px 0;
+        }
+        .feature-card {
+            transition: transform 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        @media (max-width: 576px) {
+            .hero-section {
+                padding: 60px 0;
+                text-align: center;
+            }
+            .hero-section .display-4 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-4">Platform Blog Modern dengan AI</h1>
+                    <p class="lead mb-4">
+                        Buat, kelola, dan publikasikan konten blog dengan fitur AI content generation, 
+                        social media integration, dan analytics yang powerful.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="/daftar" class="btn btn-light btn-lg">
+                            <i class="fas fa-rocket me-2"></i>Mulai Sekarang
+                        </a>
+                        <a href="/demo" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-play me-2"></i>Lihat Demo
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="text-center">
+                        <i class="fas fa-laptop-code" style="font-size: 200px; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center mb-5">
+                    <h2 class="display-5 fw-bold">Fitur Unggulan</h2>
+                    <p class="lead text-muted">Platform blog lengkap dengan teknologi terdepan</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 border-0 shadow">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-robot text-primary" style="font-size: 3rem;"></i>
+                            </div>
+                            <h5 class="card-title">AI Content Generation</h5>
+                            <p class="card-text">Generate artikel berkualitas tinggi dengan bantuan AI OpenAI GPT</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 border-0 shadow">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-share-alt text-success" style="font-size: 3rem;"></i>
+                            </div>
+                            <h5 class="card-title">Social Media Integration</h5>
+                            <p class="card-text">Auto-posting ke Facebook, Twitter, Instagram, LinkedIn, dan TikTok</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 border-0 shadow">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-chart-line text-warning" style="font-size: 3rem;"></i>
+                            </div>
+                            <h5 class="card-title">Analytics Dashboard</h5>
+                            <p class="card-text">Pantau performa blog dengan analytics real-time dan reporting</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 border-0 shadow">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-credit-card text-info" style="font-size: 3rem;"></i>
+                            </div>
+                            <h5 class="card-title">Payment Integration</h5>
+                            <p class="card-text">Sistem subscription dengan Stripe, PayPal, dan Midtrans</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 border-0 shadow">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-mobile-alt text-danger" style="font-size: 3rem;"></i>
+                            </div>
+                            <h5 class="card-title">Mobile Responsive</h5>
+                            <p class="card-text">Design responsive dengan Progressive Web App (PWA) support</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 border-0 shadow">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-shield-alt text-secondary" style="font-size: 3rem;"></i>
+                            </div>
+                            <h5 class="card-title">Security & Performance</h5>
+                            <p class="card-text">Keamanan tingkat enterprise dengan caching dan optimization</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <%- include('./partials/footer') %>

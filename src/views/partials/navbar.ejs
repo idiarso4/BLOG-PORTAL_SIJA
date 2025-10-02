@@ -1,0 +1,42 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top" role="navigation" aria-label="Main navigation">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <i class="fas fa-blog me-2"></i>
+      BlogPlatform
+    </a>
+
+    <button class="navbar-toggler" type="button" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav" role="region" aria-label="Primary">
+      <ul class="navbar-nav me-auto" role="menubar" aria-label="Primary links">
+        <li class="nav-item"><a class="nav-link <%= (activeNav==='home') ? 'active' : '' %>" href="/">Home</a></li>
+        <li class="nav-item"><a class="nav-link <%= (activeNav==='blog') ? 'active' : '' %>" href="/blog">Artikel</a></li>
+        <li class="nav-item"><a class="nav-link" href="/categories">Kategori</a></li>
+        <li class="nav-item"><a class="nav-link" href="/about">Tentang</a></li>
+      </ul>
+
+      <ul class="navbar-nav" aria-label="Account links">
+        <% if (typeof user !== 'undefined' && user) { %>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" id="userMenu">
+              <i class="fas fa-user me-1"></i>
+              <%= (user.profile && user.profile.nama) ? user.profile.nama : user.username %>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu" role="menu">
+              <li><a class="dropdown-item" href="/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+              <li><a class="dropdown-item" href="/profile"><i class="fas fa-user-edit me-2"></i>Profile</a></li>
+              <li><a class="dropdown-item" href="/articles/create"><i class="fas fa-plus me-2"></i>Tulis Artikel</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/auth/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+            </ul>
+          </li>
+        <% } else { %>
+          <li class="nav-item"><a class="nav-link" href="/auth/login"><i class="fas fa-sign-in-alt me-1"></i>Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="/auth/register"><i class="fas fa-user-plus me-1"></i>Daftar</a></li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>

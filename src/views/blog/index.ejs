@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="id">
+<%- include('../partials/header', { 
+  title: `${title} - Blog Platform`, 
+  description: (typeof description !== 'undefined' && description) ? description : 'Platform blog modern dengan AI dan social media integration', 
+  user, 
+  activeNav: 'blog' 
+}) %>
+
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+        }
+        @media (max-width: 576px) {
+            .hero-section {
+                padding: 50px 0;
+                text-align: center;
+            }
+            .hero-section .display-4 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+    
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-4">
+                        Platform Blog Modern dengan AI
+                    </h1>
+                    <p class="lead mb-4">
+                        Buat, kelola, dan bagikan artikel Anda dengan bantuan AI. 
+                        Integrasikan dengan social media dan dapatkan analytics mendalam.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="/auth/register" class="btn btn-light btn-lg">
+                            <i class="fas fa-rocket me-2"></i>
+                            Mulai Gratis
+                        </a>
+                        <a href="/blog" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-book me-2"></i>
+                            Baca Artikel
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="text-center">
+                        <i class="fas fa-blog" style="font-size: 200px; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search Section -->
+    <section class="search-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <form action="/blog" method="GET" class="d-flex">
+                        <input type="text" 
+                               name="search" 
+                               class="form-control form-control-lg me-2" 
+                               placeholder="Cari artikel..."
+                               value="<%= searchQuery || '' %>">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Articles -->
+    <% if (featuredArticles && featuredArticles.length > 0) { %>
+    <section class="py-5">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-star text-warning me-2"></i>
+                        Artikel Unggulan
+                    </h2>
+                </div>
+            </div>
+            
+            <div class="row">
+                <% featuredArticles.forEach(article => { %>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card article-card h-100 position-relative">
+                        <div class="featured-badge">
+                            <i class="fas fa-star me-1"></i>
+                            Unggulan
+                        </div>
+                        
+                        <% if (article.gambarUtama) { %>
+                        <img src="<%= article.gambarUtama %>" 
+                             class="card-img-top" 
+                             alt="<%= article.judul %>"
+                             style="height: 200px; object-fit: cover;">
+                        <% } %>
+                        
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-2">
+                                <% if (article.kategori) { %>
+                                <span class="badge bg-primary category-badge">
+                                    <%= article.kategori.nama %>
+                                </span>
+                                <% } %>
+                            </div>
+                            
+                            <h5 class="card-title">
+                                <a href="/blog/<%= article.slug %>" class="text-decoration-none text-dark">
+                                    <%= article.judul %>
+                                </a>
+                            </h5>
+                            
+                            <p class="card-text text-muted">
+                                <%= article.ringkasan || article.konten.substring(0, 150) + '...' %>
+                            </p>
+                            
+                            <div class="mt-auto">
+                                <div class="article-meta d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="fas fa-user me-1"></i>
+                                        <%= article.author.profile.nama || article.author.username %>
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-calendar me-1"></i>
+                                        <%= new Date(article.createdAt).toLocaleDateString('id-ID') %>
+                                    </div>
+                                </div>
+                                
+                                <div class="article-meta mt-2 d-flex justify-content-between">
+                                    <span>
+                                        <i class="fas fa-eye me-1"></i>
+                                        <%= article.views || 0 %> views
+                                    </span>
+                                    <span>
+                                        <i class="fas fa-comment me-1"></i>
+                                        <%= article.commentCount || 0 %> komentar
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+        </div>
+    </section>
+    <% } %>
+
+    <!-- Latest Articles -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-clock text-primary me-2"></i>
+                        Artikel Terbaru
+                    </h2>
+                </div>
+            </div>
+            
+            <div class="row">
+                <% if (articles && articles.length > 0) { %>
+                    <% articles.forEach(article => { %>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card article-card h-100">
+                            <% if (article.gambarUtama) { %>
+                            <img src="<%= article.gambarUtama %>" 
+                                 class="card-img-top" 
+                                 alt="<%= article.judul %>"
+                                 style="height: 200px; object-fit: cover;">
+                            <% } %>
+                            
+                            <div class="card-body d-flex flex-column">
+                                <div class="mb-2">
+                                    <% if (article.kategori) { %>
+                                    <span class="badge bg-secondary category-badge">
+                                        <%= article.kategori.nama %>
+                                    </span>
+                                    <% } %>
+                                </div>
+                                
+                                <h5 class="card-title">
+                                    <a href="/blog/<%= article.slug %>" class="text-decoration-none text-dark">
+                                        <%= article.judul %>
+                                    </a>
+                                </h5>
+                                
+                                <p class="card-text text-muted">
+                                    <%= article.ringkasan || article.konten.substring(0, 150) + '...' %>
+                                </p>
+                                
+                                <div class="mt-auto">
+                                    <div class="article-meta d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-user me-1"></i>
+                                            <%= article.author.profile.nama || article.author.username %>
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-calendar me-1"></i>
+                                            <%= new Date(article.createdAt).toLocaleDateString('id-ID') %>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="article-meta mt-2 d-flex justify-content-between">
+                                        <span>
+                                            <i class="fas fa-eye me-1"></i>
+                                            <%= article.views || 0 %> views
+                                        </span>
+                                        <span>
+                                            <i class="fas fa-comment me-1"></i>
+                                            <%= article.commentCount || 0 %> komentar
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="col-12 text-center">
+                        <div class="py-5">
+                            <i class="fas fa-file-alt text-muted" style="font-size: 4rem;"></i>
+                            <h4 class="mt-3 text-muted">Belum ada artikel</h4>
+                            <p class="text-muted">Jadilah yang pertama menulis artikel!</p>
+                            <% if (user) { %>
+                            <a href="/articles/create" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>
+                                Tulis Artikel Pertama
+                            </a>
+                            <% } else { %>
+                            <a href="/auth/register" class="btn btn-primary">
+                                <i class="fas fa-user-plus me-2"></i>
+                                Daftar untuk Menulis
+                            </a>
+                            <% } %>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+            
+            <!-- Pagination -->
+            <% if (pagination && pagination.pages > 1) { %>
+            <div class="row mt-4">
+                <div class="col">
+                    <nav aria-label="Article pagination">
+                        <ul class="pagination justify-content-center">
+                            <% if (pagination.page > 1) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<%= pagination.page - 1 %><%= searchQuery ? '&search=' + searchQuery : '' %>">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            <% } %>
+                            
+                            <% for (let i = Math.max(1, pagination.page - 2); i <= Math.min(pagination.pages, pagination.page + 2); i++) { %>
+                            <li class="page-item <%= i === pagination.page ? 'active' : '' %>">
+                                <a class="page-link" href="?page=<%= i %><%= searchQuery ? '&search=' + searchQuery : '' %>">
+                                    <%= i %>
+                                </a>
+                            </li>
+                            <% } %>
+                            
+                            <% if (pagination.page < pagination.pages) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<%= pagination.page + 1 %><%= searchQuery ? '&search=' + searchQuery : '' %>">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            <% } %>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-item">
+                        <div class="stat-number"><%= stats.totalArticles || 0 %></div>
+                        <div class="text-muted">Total Artikel</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-item">
+                        <div class="stat-number"><%= stats.totalAuthors || 0 %></div>
+                        <div class="text-muted">Penulis Aktif</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-item">
+                        <div class="stat-number"><%= stats.totalViews || 0 %></div>
+                        <div class="text-muted">Total Views</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-item">
+                        <div class="stat-number"><%= stats.totalComments || 0 %></div>
+                        <div class="text-muted">Total Komentar</div>
+                    </div>

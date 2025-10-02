@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="id">
+<%- include('../partials/header', {
+  title: `Dashboard - ${(user.profile && user.profile.nama) ? user.profile.nama : user.username}`,
+  description: 'Kelola blog dan konten Anda',
+  user,
+  activeNav: 'dashboard'
+}) %>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .recent-activity {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .activity-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .subscription-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+        }
+        
+        .usage-progress {
+            margin-bottom: 15px;
+        }
+        
+        .usage-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+    </style>
+ 
+<div class="bg-light">
+    <div class="container-fluid">
+        <!-- Mobile Offcanvas Sidebar -->
+        <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="mobileSidebarLabel">Dashboard</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <nav class="nav flex-column" role="navigation" aria-label="Dashboard navigation">
+                    <a class="nav-link active" href="#overview" data-section="overview">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Overview
+                    </a>
+                    <a class="nav-link" href="#articles" data-section="articles">
+                        <i class="fas fa-newspaper me-2"></i>
+                        Artikel Saya
+                    </a>
+                    <a class="nav-link" href="#analytics" data-section="analytics">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Analytics
+                    </a>
+                    <a class="nav-link" href="#subscription" data-section="subscription">
+                        <i class="fas fa-crown me-2"></i>
+                        Subscription
+                    </a>
+                    <a class="nav-link" href="#profile" data-section="profile">
+                        <i class="fas fa-user-edit me-2"></i>
+                        Profile
+                    </a>
+                    <a class="nav-link" href="#settings" data-section="settings">
+                        <i class="fas fa-cog me-2"></i>
+                        Settings
+                    </a>
+                    <hr class="my-3">
+                    <a class="nav-link" href="/articles/create">
+                        <i class="fas fa-plus me-2"></i>
+                        Tulis Artikel
+                    </a>
+                    <a class="nav-link" href="/blog">
+                        <i class="fas fa-globe me-2"></i>
+                        Lihat Blog
+                    </a>
+                    <a class="nav-link" href="/auth/logout">
+                        <i class="fas fa-sign-out-alt me-2"></i>
+                        Logout
+                    </a>
+                </nav>
+            </div>
+        </div>
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar p-0 d-none d-md-block" role="complementary" aria-label="Sidebar">
+                <div class="p-3">
+                    <h4 class="text-white mb-4">
+                        <i class="fas fa-tachometer-alt me-2"></i>
+                        Dashboard
+                    </h4>
+                    
+                    <nav class="nav flex-column" role="navigation" aria-label="Dashboard navigation">
+                        <a class="nav-link active" href="#overview" data-section="overview">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Overview
+                        </a>
+                        <a class="nav-link" href="#articles" data-section="articles">
+                            <i class="fas fa-newspaper me-2"></i>
+                            Artikel Saya
+                        </a>
+                        <a class="nav-link" href="#analytics" data-section="analytics">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Analytics
+                        </a>
+                        <a class="nav-link" href="#subscription" data-section="subscription">
+                            <i class="fas fa-crown me-2"></i>
+                            Subscription
+                        </a>
+                        <a class="nav-link" href="#profile" data-section="profile">
+                            <i class="fas fa-user-edit me-2"></i>
+                            Profile
+                        </a>
+                        <a class="nav-link" href="#settings" data-section="settings">
+                            <i class="fas fa-cog me-2"></i>
+                            Settings
+                        </a>
+                        
+                        <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
+                        
+                        <a class="nav-link" href="/articles/create">
+                            <i class="fas fa-plus me-2"></i>
+                            Tulis Artikel
+                        </a>
+                        <a class="nav-link" href="/blog">
+                            <i class="fas fa-globe me-2"></i>
+                            Lihat Blog
+                        </a>
+                        <a class="nav-link" href="/auth/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10" id="main-content" role="main" tabindex="-1">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center py-3 px-4 bg-white shadow-sm">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-secondary d-md-none me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <div>
+                            <h2 class="mb-0">Selamat datang, <%= user.profile.nama || user.username %>!</h2>
+                            <small class="text-muted">Kelola blog dan konten Anda</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="periodMenu" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">
+                                <i class="fas fa-calendar me-2"></i>
+                                <span id="periodSelector">30 Hari Terakhir</span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="periodMenu" role="menu">
+                                <li><a class="dropdown-item" href="#" data-period="7d">7 Hari Terakhir</a></li>
+                                <li><a class="dropdown-item" href="#" data-period="30d">30 Hari Terakhir</a></li>
+                                <li><a class="dropdown-item" href="#" data-period="90d">90 Hari Terakhir</a></li>
+                                <li><a class="dropdown-item" href="#" data-period="1y">1 Tahun Terakhir</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Content Sections -->
+                <div class="p-4">
+                    <!-- Overview Section -->
+                    <div id="overview-section" class="content-section">
+                        <!-- Statistics Cards -->
+                        <div class="row mb-4">
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="stat-card text-center">
+                                    <div class="stat-number text-primary" id="totalArticles">-</div>
+                                    <div class="stat-label">Total Artikel</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="stat-card text-center">
+                                    <div class="stat-number text-success" id="totalViews">-</div>
+                                    <div class="stat-label">Total Views</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="stat-card text-center">
+                                    <div class="stat-number text-info" id="totalComments">-</div>
+                                    <div class="stat-label">Total Komentar</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="stat-card text-center">
+                                    <div class="stat-number text-warning" id="totalLikes">-</div>
+                                    <div class="stat-label">Total Likes</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Charts Row -->
+                        <div class="row mb-4">
+                            <div class="col-lg-8 mb-3">
+                                <div class="chart-container">
+                                    <h5 class="mb-3">Views Over Time</h5>
+                                    <canvas id="viewsChart" height="100"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 mb-3">
+                                <div class="recent-activity">
+                                    <h5 class="mb-3">Aktivitas Terbaru</h5>
+                                    <div id="recentActivity">
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-spinner fa-spin text-muted"></i>
+                                            <p class="text-muted mt-2">Memuat aktivitas...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Top Articles -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="chart-container">
+                                    <h5 class="mb-3">Artikel Terpopuler</h5>
+                                    <div id="topArticles">
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-spinner fa-spin text-muted"></i>
+                                            <p class="text-muted mt-2">Memuat artikel...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Articles Section -->
+                    <div id="articles-section" class="content-section d-none">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3>Artikel Saya</h3>
+                            <a href="/articles/create" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>
+                                Tulis Artikel Baru
+                            </a>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <div id="articlesTable">
+                                <div class="text-center py-4">
+                                    <i class="fas fa-spinner fa-spin text-muted"></i>
+                                    <p class="text-muted mt-2">Memuat artikel...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Analytics Section -->
+                    <div id="analytics-section" class="content-section d-none">
+                        <h3 class="mb-4">Analytics Detail</h3>
+                        
+                        <div class="row">
+                            <div class="col-lg-6 mb-4">
+                                <div class="chart-container">
+                                    <h5 class="mb-3">Article Performance</h5>
+                                    <canvas id="articlePerformanceChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4">
+                                <div class="chart-container">
+                                    <h5 class="mb-3">Engagement Metrics</h5>
+                                    <canvas id="engagementChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Subscription Section -->
+                    <div id="subscription-section" class="content-section d-none">
+                        <h3 class="mb-4">Subscription Management</h3>
+                        
+                        <div class="row">
+                            <div class="col-lg-8 mb-4">
+                                <div class="subscription-card">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <h4 id="currentPlan">Loading...</h4>
+                                            <p class="mb-0 opacity-75" id="planDescription">Loading...</p>
+                                        </div>
+                                        <span class="badge bg-light text-dark" id="planStatus">Loading...</span>
+                                    </div>
+                                    
+                                    <div class="row mt-4">
+                                        <div class="col-md-6">
+                                            <p class="mb-1 opacity-75">Berlaku hingga:</p>
+                                            <h6 id="expiryDate">Loading...</h6>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-1 opacity-75">Auto Renewal:</p>
+                                            <h6 id="autoRenewal">Loading...</h6>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4">
+                                        <button class="btn btn-light me-2" onclick="showUpgradeModal()">
+                                            <i class="fas fa-arrow-up me-2"></i>
+                                            Upgrade Plan
+                                        </button>
+                                        <button class="btn btn-outline-light" onclick="manageSubscription()">
+                                            <i class="fas fa-cog me-2"></i>
+                                            Kelola
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-4 mb-4">
+                                <div class="chart-container">
+                                    <h5 class="mb-3">Usage Statistics</h5>
+                                    <div id="usageStats">
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-spinner fa-spin text-muted"></i>
+                                            <p class="text-muted mt-2">Memuat usage...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Profile Section -->
+                    <div id="profile-section" class="content-section d-none">
+                        <h3 class="mb-4">Profile Management</h3>
+                        
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="chart-container">
+                                    <form id="profileForm">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Nama Lengkap</label>
+                                                <input type="text" class="form-control" id="profileNama" value="<%= user.profile.nama || '' %>">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Username</label>
+                                                <input type="text" class="form-control" id="profileUsername" value="<%= user.username %>" readonly>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="profileEmail" value="<%= user.email %>" readonly>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label">Bio</label>
+                                            <textarea class="form-control" id="profileBio" rows="4"><%= user.profile.bio || '' %></textarea>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Website</label>
+                                                <input type="url" class="form-control" id="profileWebsite" value="<%= user.profile.website || '' %>">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Twitter</label>
+                                                <input type="text" class="form-control" id="profileTwitter" value="<%= user.profile.twitter || '' %>">
+                                            </div>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i>
+                                            Simpan Perubahan
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-4">
+                                <div class="chart-container text-center">
+                                    <h5 class="mb-3">Profile Picture</h5>
+                                    <div class="mb-3">
+                                        <% if (user.profile.avatar) { %>
+                                        <img src="<%= user.profile.avatar %>" alt="Avatar" class="rounded-circle" width="150" height="150">
+                                        <% } else { %>
+                                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center text-white"
+                                             style="width: 150px; height: 150px; font-size: 3rem;">
+                                            <%= (user.profile.nama || user.username).charAt(0).toUpperCase() %>
+                                        </div>
+                                        <% } %>
+                                    </div>
+                                    <button class="btn btn-outline-primary">
+                                        <i class="fas fa-camera me-2"></i>
+                                        Ganti Foto
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings Section -->
+                    <div id="settings-section" class="content-section d-none">
+                        <h3 class="mb-4">Settings</h3>
+                        
+                        <div class="chart-container">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <h5 class="mb-3">Notification Settings</h5>
+                                    
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                        <label class="form-check-label" for="emailNotifications">
+                                            Email Notifications
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="commentNotifications" checked>
+                                        <label class="form-check-label" for="commentNotifications">
+                                            Comment Notifications
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="marketingEmails">
+                                        <label class="form-check-label" for="marketingEmails">
+                                            Marketing Emails
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-lg-6">
+                                    <h5 class="mb-3">Privacy Settings</h5>
+                                    
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="profilePublic" checked>
+                                        <label class="form-check-label" for="profilePublic">
+                                            Public Profile
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="showEmail">
+                                        <label class="form-check-label" for="showEmail">
+                                            Show Email in Profile
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="allowComments" checked>
+                                        <label class="form-check-label" for="allowComments">
+                                            Allow Comments on Articles
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <hr class="my-4">
+                            
+                            <div class="row">
+                                <div class="col-12">
+                                    <h5 class="mb-3 text-danger">Danger Zone</h5>
+                                    <p class="text-muted">These actions cannot be undone.</p>
+                                    
+                                    <button class="btn btn-outline-danger me-2" onclick="changePassword()">
+                                        <i class="fas fa-key me-2"></i>
+                                        Change Password
+                                    </button>
+                                    
+                                    <button class="btn btn-danger" onclick="deleteAccount()">
+                                        <i class="fas fa-trash me-2"></i>
+                                        Delete Account
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentPeriod = '30d';
+        let dashboardData = null;
+        let viewsChart = null;
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            setupEventListeners();
+        });
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Navigation
+            document.querySelectorAll('.nav-link[data-section]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showSection(this.dataset.section);
+                    
+                    // Update active nav
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Period selector
+            document.querySelectorAll('[data-period]').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    currentPeriod = this.dataset.period;
+                    document.getElementById('periodSelector').textContent = this.textContent;
+                    loadDashboardData();
+                });
+            });
+            
+            // Profile form
+            document.getElementById('profileForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveProfile();
+            });
+        }
+        
+        // Show section
+        function showSection(sectionName) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.add('d-none');
+            });
+            document.getElementById(sectionName + '-section').classList.remove('d-none');
+            
+            // Load section-specific data
+            switch(sectionName) {
+                case 'articles':
+                    loadArticles();
+                    break;
+                case 'analytics':
+                    loadAnalytics();
+                    break;
+                case 'subscription':
+                    loadSubscription();
+                    break;
+            }
+        }
+        
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                const response = await fetch(`/api/dashboard/user?period=${currentPeriod}`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    dashboardData = data.data;
+                    updateDashboard();
+                } else {
+                    console.error('Failed to load dashboard data:', data.error);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+        
+        // Update dashboard
+        function updateDashboard() {
+            if (!dashboardData) return;
+            
+            // Update statistics
+            document.getElementById('totalArticles').textContent = dashboardData.summary.totalArticles;
+            document.getElementById('totalViews').textContent = dashboardData.summary.totalViews.toLocaleString();
+            document.getElementById('totalComments').textContent = dashboardData.summary.totalComments;
+            document.getElementById('totalLikes').textContent = dashboardData.summary.totalLikes;
+            
+            // Update charts
+            updateViewsChart();
+            updateRecentActivity();
+            updateTopArticles();
+        }
+        
+        // Update views chart
+        function updateViewsChart() {
+            const ctx = document.getElementById('viewsChart').getContext('2d');
+            
+            if (viewsChart) {
+                viewsChart.destroy();
+            }
+            
+            viewsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dashboardData.charts.viewsOverTime.map(item => item.date),
+                    datasets: [{
+                        label: 'Views',
+                        data: dashboardData.charts.viewsOverTime.map(item => item.views),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update recent activity
+        function updateRecentActivity() {
+            const container = document.getElementById('recentActivity');
+            
+            if (dashboardData.recentComments && dashboardData.recentComments.length > 0) {
+                container.innerHTML = dashboardData.recentComments.map(comment => `
+                    <div class="activity-item">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-comment text-primary me-3"></i>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">${comment.author.profile.nama || comment.author.username}</div>
+                                <div class="text-muted small">berkomentar di "${comment.article.title}"</div>
+                                <div class="text-muted small">${new Date(comment.createdAt).toLocaleDateString('id-ID')}</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-inbox text-muted" style="font-size: 2rem;"></i>
+                        <p class="text-muted mt-2">Belum ada aktivitas</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Update top articles
+        function updateTopArticles() {
+            const container = document.getElementById('topArticles');
+            
+            if (dashboardData.topArticles && dashboardData.topArticles.length > 0) {
+                container.innerHTML = `
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Artikel</th>
+                                    <th>Views</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${dashboardData.topArticles.map(article => `
+                                    <tr>
+                                        <td>
+                                            <a href="/blog/${article.slug}" class="text-decoration-none">
+                                                ${article.title}
+                                            </a>
+                                        </td>
+                                        <td>${article.views}</td>
+                                        <td>
+                                            <a href="/articles/edit/${article._id}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-newspaper text-muted" style="font-size: 2rem;"></i>
+                        <p class="text-muted mt-2">Belum ada artikel</p>
+                        <a href="/articles/create" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Tulis Artikel Pertama
+                        </a>
+                    </div>
+                `;
+            }
+        }
+        
+        // Load articles
+        async function loadArticles() {
+            // Implementation for loading user articles
+            console.log('Loading articles...');
+        }
+        
+        // Load analytics
+        async function loadAnalytics() {
+            // Implementation for loading detailed analytics
+            console.log('Loading analytics...');
+        }
+        
+        // Load subscription
+        async function loadSubscription() {
+            try {
+                const response = await fetch('/api/subscription/current', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateSubscriptionInfo(data.data.subscription);
+                    loadUsageStats();
+                }
+            } catch (error) {
+                console.error('Error loading subscription:', error);
+            }
+        }
+        
+        // Update subscription info
+        function updateSubscriptionInfo(subscription) {
+            document.getElementById('currentPlan').textContent = subscription.subscription.name;
+            document.getElementById('planDescription').textContent = subscription.subscription.description;
+            document.getElementById('planStatus').textContent = subscription.status;
+            document.getElementById('expiryDate').textContent = new Date(subscription.endDate).toLocaleDateString('id-ID');
+            document.getElementById('autoRenewal').textContent = subscription.autoRenew ? 'Aktif' : 'Nonaktif';
+        }
+        
+        // Load usage stats
+        async function loadUsageStats() {
+            try {
+                const response = await fetch('/api/subscription/usage', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateUsageStats(data.data.usage);
+                }
+            } catch (error) {
+                console.error('Error loading usage stats:', error);
+            }
+        }
+        
+        // Update usage stats
+        function updateUsageStats(usage) {
+            const container = document.getElementById('usageStats');
+            
+            container.innerHTML = `
+                <div class="usage-progress">
+                    <div class="usage-label">
+                        <span>Artikel</span>
+                        <span>${usage.current.articlesCreated}/${usage.limits.maxArticles === -1 ? '∞' : usage.limits.maxArticles}</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: ${usage.percentages.maxArticles}%"></div>
+                    </div>
+                </div>
+                
+                <div class="usage-progress">
+                    <div class="usage-label">
+                        <span>AI Requests</span>
+                        <span>${usage.current.aiRequestsUsed}/${usage.limits.aiRequestsPerMonth}</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-info" style="width: ${usage.percentages.aiRequestsPerMonth}%"></div>
+                    </div>
+                </div>
+                
+                <div class="usage-progress">
+                    <div class="usage-label">
+                        <span>Storage</span>
+                        <span>${usage.current.storageUsed}MB/${usage.limits.maxFileUpload}MB</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-warning" style="width: ${usage.percentages.maxFileUpload}%"></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Save profile
+        async function saveProfile() {
+            const profileData = {
+                profile: {
+                    nama: document.getElementById('profileNama').value,
+                    bio: document.getElementById('profileBio').value,
+                    website: document.getElementById('profileWebsite').value,
+                    twitter: document.getElementById('profileTwitter').value
+                }
+            };
+            
+            try {
+                const response = await fetch('/api/user/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
+                    body: JSON.stringify(profileData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Profile berhasil diupdate!');
+                } else {
+                    alert('Gagal mengupdate profile: ' + data.error.message);
+                }
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                alert('Terjadi kesalahan saat menyimpan profile');
+            }
+        }
+        
+        // Utility functions
+        function showUpgradeModal() {
+            // Implementation for upgrade modal
+            alert('Upgrade modal will be implemented');
+        }
+        
+        function manageSubscription() {
+            // Implementation for subscription management
+            alert('Subscription management will be implemented');
+        }
+        
+        function changePassword() {
+            // Implementation for change password
+            alert('Change password will be implemented');
+        }
+        
+        function deleteAccount() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                // Implementation for account deletion
+                alert('Account deletion will be implemented');
+            }
+        }
+    </script>
+
+    <%- include('../partials/footer') %>

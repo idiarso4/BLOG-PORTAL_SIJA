@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="id">
+<%- include('../partials/header', { 
+  title: `${article.judul} - Blog Platform`, 
+  description: article.ringkasan || article.konten.substring(0, 160), 
+  keywords: article.tags ? article.tags.join(', ') : '',
+  user, 
+  activeNav: 'blog' 
+}) %>
+    <!-- Open Graph -->
+    <meta property="og:title" content="<%= article.judul %>">
+    <meta property="og:description" content="<%= article.ringkasan || article.konten.substring(0, 160) %>">
+    <meta property="og:image" content="<%= article.gambarUtama || '/images/default-article.jpg' %>">
+    <meta property="og:url" content="<%= process.env.APP_URL %>/blog/<%= article.slug %>">
+    <meta property="og:type" content="article">
+    <!-- Prism.js for code highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+    
+    <style>
+        .article-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .article-meta {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .article-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        
+        .article-content h1,
+        .article-content h2,
+        .article-content h3,
+        .article-content h4,
+        .article-content h5,
+        .article-content h6 {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .article-content p {
+            margin-bottom: 1.5rem;
+        }
+        
+        .article-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+        
+        .article-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1.5rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            background-color: #f8f9fa;
+            padding: 1rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .article-actions {
+            position: sticky;
+            top: 100px;
+        }
+        
+        .share-button {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            border-radius: 25px;
+        }
+        
+        .comment-section {
+            background-color: #f8f9fa;
+            padding: 40px 0;
+        }
+        
+        .comment-item {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .comment-author {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .comment-date {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .related-articles {
+            background-color: #f8f9fa;
+            padding: 40px 0;
+        }
+        
+        .related-card {
+            transition: transform 0.3s ease;
+        }
+        
+        .related-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .tag-badge {
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .toc {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc ul ul {
+            padding-left: 20px;
+        }
+        
+        .toc a {
+            text-decoration: none;
+            color: #667eea;
+        }
+        
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        /* Mobile overflow handling for code blocks and tables */
+        .article-content pre {
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 8px;
+            padding: 1rem;
+            background: #f8f9fa;
+        }
+        .article-content code {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .article-content table {
+            width: 100%;
+        }
+    </style>
+    
+    <!-- Article Header -->
+    <section class="article-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center">
+                    <% if (article.kategori) { %>
+                    <span class="badge bg-light text-dark mb-3">
+                        <i class="fas fa-folder me-1"></i>
+                        <%= article.kategori.nama %>
+                    </span>
+                    <% } %>
+                    
+                    <h1 class="display-5 fw-bold mb-4">
+                        <%= article.judul %>
+                    </h1>
+                    
+                    <% if (article.ringkasan) { %>
+                    <p class="lead mb-4">
+                        <%= article.ringkasan %>
+                    </p>
+                    <% } %>
+                    
+                    <div class="article-meta d-flex justify-content-center align-items-center flex-wrap gap-3">
+                        <div>
+                            <i class="fas fa-user me-1"></i>
+                            <a href="/authors/<%= article.author.username %>" class="text-white text-decoration-none">
+                                <%= article.author.profile.nama || article.author.username %>
+                            </a>
+                        </div>
+                        <div>
+                            <i class="fas fa-calendar me-1"></i>
+                            <%= new Date(article.createdAt).toLocaleDateString('id-ID', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                            }) %>
+                        </div>
+                        <div>
+                            <i class="fas fa-clock me-1"></i>
+                            <%= article.readingTime || '5' %> menit baca
+                        </div>
+                        <div>
+                            <i class="fas fa-eye me-1"></i>
+                            <%= article.views || 0 %> views
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Article Content -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <!-- Main Content -->
+                <div class="col-lg-8">
+                    <!-- Featured Image -->
+                    <% if (article.gambarUtama) { %>
+                    <div class="mb-4">
+                        <img src="<%= article.gambarUtama %>" 
+                             alt="<%= article.judul %>" 
+                             class="img-fluid rounded shadow">
+                    </div>
+                    <% } %>
+                    
+                    <!-- Table of Contents -->
+                    <% if (article.tableOfContents && article.tableOfContents.length > 0) { %>
+                    <div class="toc">
+                        <h5><i class="fas fa-list me-2"></i>Daftar Isi</h5>
+                        <ul>
+                            <% article.tableOfContents.forEach(item => { %>
+                            <li>
+                                <a href="#<%= item.id %>"><%= item.text %></a>
+                                <% if (item.children && item.children.length > 0) { %>
+                                <ul>
+                                    <% item.children.forEach(child => { %>
+                                    <li><a href="#<%= child.id %>"><%= child.text %></a></li>
+                                    <% }); %>
+                                </ul>
+                                <% } %>
+                            </li>
+                            <% }); %>
+                        </ul>
+                    </div>
+                    <% } %>
+                    
+                    <!-- Article Content -->
+                    <div class="article-content">
+                        <%- article.konten %>
+                    </div>
+                    
+                    <!-- Tags -->
+                    <% if (article.tags && article.tags.length > 0) { %>
+                    <div class="mt-4 pt-4 border-top">
+                        <h6><i class="fas fa-tags me-2"></i>Tags:</h6>
+                        <% article.tags.forEach(tag => { %>
+                        <a href="/blog?tag=<%= tag %>" class="badge bg-secondary tag-badge text-decoration-none">
+                            <%= tag %>
+                        </a>
+                        <% }); %>
+                    </div>
+                    <% } %>
+                    
+                    <!-- Author Bio -->
+                    <div class="mt-5 p-4 bg-light rounded">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <% if (article.author.profile.avatar) { %>
+                                <img src="<%= article.author.profile.avatar %>" 
+                                     alt="<%= article.author.profile.nama || article.author.username %>"
+                                     class="rounded-circle"
+                                     width="80" height="80">
+                                <% } else { %>
+                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white"
+                                     style="width: 80px; height: 80px; font-size: 2rem;">
+                                    <%= (article.author.profile.nama || article.author.username).charAt(0).toUpperCase() %>
+                                </div>
+                                <% } %>
+                            </div>
+                            <div class="col">
+                                <h5 class="mb-1">
+                                    <a href="/authors/<%= article.author.username %>" class="text-decoration-none">
+                                        <%= article.author.profile.nama || article.author.username %>
+                                    </a>
+                                </h5>
+                                <% if (article.author.profile.bio) { %>
+                                <p class="text-muted mb-2"><%= article.author.profile.bio %></p>
+                                <% } %>
+                                <div class="d-flex gap-2">
+                                    <% if (article.author.profile.website) { %>
+                                    <a href="<%= article.author.profile.website %>" class="btn btn-sm btn-outline-primary" target="_blank">
+                                        <i class="fas fa-globe me-1"></i>Website
+                                    </a>
+                                    <% } %>
+                                    <% if (article.author.profile.twitter) { %>
+                                    <a href="https://twitter.com/<%= article.author.profile.twitter %>" class="btn btn-sm btn-outline-info" target="_blank">
+                                        <i class="fab fa-twitter me-1"></i>Twitter
+                                    </a>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+                    <div class="article-actions">
+                        <!-- Share Buttons -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-share-alt me-2"></i>Bagikan Artikel</h6>
+                            </div>
+                            <div class="card-body">
+                                <button class="btn btn-primary share-button" onclick="shareToFacebook()">
+                                    <i class="fab fa-facebook me-2"></i>Facebook
+                                </button>
+                                <button class="btn btn-info share-button" onclick="shareToTwitter()">
+                                    <i class="fab fa-twitter me-2"></i>Twitter
+                                </button>
+                                <button class="btn btn-success share-button" onclick="shareToWhatsApp()">
+                                    <i class="fab fa-whatsapp me-2"></i>WhatsApp
+                                </button>
+                                <button class="btn btn-secondary share-button" onclick="copyLink()">
+                                    <i class="fas fa-link me-2"></i>Copy Link
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Like Button -->
+                        <% if (user) { %>
+                        <div class="card mb-4">
+                            <div class="card-body text-center">
+                                <button class="btn btn-outline-danger btn-lg" 
+                                        id="likeButton" 
+                                        onclick="toggleLike()"
+                                        data-article-id="<%= article._id %>">
+                                    <i class="fas fa-heart me-2"></i>
+                                    <span id="likeText">Suka</span>
+                                    <span class="badge bg-danger ms-2" id="likeCount">
+                                        <%= article.likeCount || 0 %>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                        <% } %>
+                        
+                        <!-- Related Articles -->
+                        <% if (relatedArticles && relatedArticles.length > 0) { %>
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-newspaper me-2"></i>Artikel Terkait</h6>
+                            </div>
+                            <div class="card-body">
+                                <% relatedArticles.forEach(related => { %>
+                                <div class="mb-3 pb-3 border-bottom">
+                                    <h6 class="mb-1">
+                                        <a href="/blog/<%= related.slug %>" class="text-decoration-none">
+                                            <%= related.judul %>
+                                        </a>
+                                    </h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        <%= new Date(related.createdAt).toLocaleDateString('id-ID') %>
+                                    </small>
+                                </div>
+                                <% }); %>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comments Section -->
+    <section class="comment-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h4 class="mb-4">
+                        <i class="fas fa-comments me-2"></i>
+                        Komentar (<%= comments ? comments.length : 0 %>)
+                    </h4>
+                    
+                    <!-- Comment Form -->
+                    <% if (user) { %>
+                    <div class="comment-item mb-4">
+                        <form id="commentForm">
+                            <div class="mb-3">
+                                <textarea class="form-control" 
+                                          id="commentContent" 
+                                          rows="4" 
+                                          placeholder="Tulis komentar Anda..."
+                                          required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                Kirim Komentar
+                            </button>
+                        </form>
+                    </div>
+                    <% } else { %>
+                    <div class="comment-item mb-4 text-center">
+                        <p class="mb-3">Silakan login untuk memberikan komentar</p>
+                        <a href="/auth/login" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            Login
+                        </a>
+                    </div>
+                    <% } %>
+                    
+                    <!-- Comments List -->
+                    <div id="commentsList">
+                        <% if (comments && comments.length > 0) { %>
+                            <% comments.forEach(comment => { %>
+                            <div class="comment-item">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="comment-author">
+                                        <%= comment.author.profile.nama || comment.author.username %>
+                                    </div>
+                                    <div class="comment-date">
+                                        <%= new Date(comment.createdAt).toLocaleDateString('id-ID', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        }) %>
+                                    </div>
+                                </div>
+                                <div class="comment-content">
+                                    <%= comment.konten %>
+                                </div>
+                                
+                                <!-- Reply Button -->
+                                <% if (user) { %>
+                                <button class="btn btn-sm btn-outline-primary mt-2" 
+                                        onclick="showReplyForm('<%= comment._id %>')">
+                                    <i class="fas fa-reply me-1"></i>
+                                    Balas
+                                </button>
+                                <% } %>
+                                
+                                <!-- Replies -->
+                                <% if (comment.replies && comment.replies.length > 0) { %>
+                                <div class="ms-4 mt-3">
+                                    <% comment.replies.forEach(reply => { %>
+                                    <div class="comment-item">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div class="comment-author">
+                                                <%= reply.author.profile.nama || reply.author.username %>
+                                            </div>
+                                            <div class="comment-date">
+                                                <%= new Date(reply.createdAt).toLocaleDateString('id-ID') %>
+                                            </div>
+                                        </div>
+                                        <div class="comment-content">
+                                            <%= reply.konten %>
+                                        </div>
+                                    </div>
+                                    <% }); %>
+                                </div>
+                                <% } %>
+                            </div>
+                            <% }); %>
+                        <% } else { %>
+                            <div class="text-center py-5">
+                                <i class="fas fa-comment-slash text-muted" style="font-size: 3rem;"></i>
+                                <h5 class="mt-3 text-muted">Belum ada komentar</h5>
+                                <p class="text-muted">Jadilah yang pertama memberikan komentar!</p>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Related Articles -->
+    <% if (relatedArticles && relatedArticles.length > 0) { %>
+    <section class="related-articles">
+        <div class="container">
+            <h4 class="text-center mb-5">
+                <i class="fas fa-newspaper me-2"></i>
+                Artikel Lainnya
+            </h4>
+            
+            <div class="row">
+                <% relatedArticles.slice(0, 3).forEach(related => { %>
+                <div class="col-lg-4 mb-4">
+                    <div class="card related-card h-100">
+                        <% if (related.gambarUtama) { %>
+                        <img src="<%= related.gambarUtama %>" 
+                             class="card-img-top" 
+                             alt="<%= related.judul %>"
+                             style="height: 200px; object-fit: cover;">
+                        <% } %>
+                        
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title">
+                                <a href="/blog/<%= related.slug %>" class="text-decoration-none">
+                                    <%= related.judul %>
+                                </a>
+                            </h6>
+                            
+                            <p class="card-text text-muted small">
+                                <%= related.ringkasan || related.konten.substring(0, 100) + '...' %>
+                            </p>
+                            
+                            <div class="mt-auto">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    <%= new Date(related.createdAt).toLocaleDateString('id-ID') %>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+    <% } %>
+
+    <!-- Prism.js for code highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        const isLoggedIn = document.body && document.body.dataset && document.body.dataset.loggedIn === '1';
+        // Wrap wide tables in a responsive container to avoid overflow on mobile
+        (function wrapArticleTables(){
+            const container = document.querySelector('.article-content');
+            if (!container) return;
+            container.querySelectorAll('table').forEach(tbl => {
+                if (!tbl.parentElement.classList.contains('table-responsive')) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'table-responsive';
+                    tbl.parentNode.insertBefore(wrapper, tbl);
+                    wrapper.appendChild(tbl);
+                }
+                tbl.classList.add('table','table-striped');
+            });
+        })();
+
+        // Share functions
+        function shareToFacebook() {
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+        }
+        function shareToTwitter() {
+            const url = encodeURIComponent(window.location.href);
+            const text = encodeURIComponent('<%= article.judul %>');
+            window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
+        }
+        function shareToWhatsApp() {
+            const url = encodeURIComponent(window.location.href);
+            const text = encodeURIComponent('<%= article.judul %> - <%= article.ringkasan || "" %>');
+            window.open(`https://wa.me/?text=${text} ${url}`, '_blank');
+        }
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                alert('Link berhasil disalin!');
+            });
+        }
+
+        // Like functionality
+        function toggleLike() {
+            if (!isLoggedIn) {
+                alert('Silakan login untuk menyukai artikel.');
+                return;
+            }
+            const button = document.getElementById('likeButton');
+            const articleId = button.dataset.articleId;
+            fetch(`/api/articles/${articleId}/like`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const likeCount = document.getElementById('likeCount');
+                    const likeText = document.getElementById('likeText');
+                    likeCount.textContent = data.data.likeCount;
+                    if (data.data.isLiked) {
+                        button.classList.remove('btn-outline-danger');
+                        button.classList.add('btn-danger');
+                        likeText.textContent = 'Disukai';
+                    } else {
+                        button.classList.remove('btn-danger');
+                        button.classList.add('btn-outline-danger');
+                        likeText.textContent = 'Suka';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyukai artikel');
+            });
+        }
+        // Comment functionality (attach only if form exists)
+        const commentFormEl = document.getElementById('commentForm');
+        if (commentFormEl) {
+        commentFormEl.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const content = document.getElementById('commentContent').value;
+            if (!content.trim()) return;
+            fetch(`/api/articles/<%= article._id %>/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                body: JSON.stringify({ konten: content })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Terjadi kesalahan saat mengirim komentar');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat mengirim komentar');
+            });
+        });
+        }
+
+        // Track article view
+        fetch(`/api/analytics/track`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                eventType: 'view',
+                entityType: 'article',
+                entityId: '<%= article._id %>'
+            })
+        }).catch(error => { console.error('Analytics tracking error:', error); });
+    </script>
+
+    <%- include('../partials/footer') %>

@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Blog Platform</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- DataTables -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #dc3545 0%, #6f42c1 100%);
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            margin: 2px 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            border-left: 4px solid;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card.users { border-left-color: #007bff; }
+        .stat-card.articles { border-left-color: #28a745; }
+        .stat-card.revenue { border-left-color: #ffc107; }
+        .stat-card.subscriptions { border-left-color: #dc3545; }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+        }
+        
+        .action-buttons .btn {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+        .alert-item {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid;
+        }
+        
+        .alert-item.high { border-left-color: #dc3545; }
+        .alert-item.medium { border-left-color: #ffc107; }
+        .alert-item.low { border-left-color: #17a2b8; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container-fluid">
+        <!-- Mobile Offcanvas Sidebar -->
+        <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="adminMobileSidebar" aria-labelledby="adminMobileSidebarLabel" role="dialog" aria-modal="true">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="adminMobileSidebarLabel">Admin Panel</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <nav class="nav flex-column" role="navigation" aria-label="Admin navigation">
+                    <a class="nav-link active" href="#overview" data-section="overview"><i class="fas fa-chart-line me-2"></i>Overview</a>
+                    <a class="nav-link" href="#users" data-section="users"><i class="fas fa-users me-2"></i>User Management</a>
+                    <a class="nav-link" href="#content" data-section="content"><i class="fas fa-newspaper me-2"></i>Content Moderation</a>
+                    <a class="nav-link" href="#subscriptions" data-section="subscriptions"><i class="fas fa-crown me-2"></i>Subscriptions</a>
+                    <a class="nav-link" href="#analytics" data-section="analytics"><i class="fas fa-chart-bar me-2"></i>Analytics</a>
+                    <a class="nav-link" href="#settings" data-section="settings"><i class="fas fa-cog me-2"></i>System Settings</a>
+                    <hr class="my-3">
+                    <a class="nav-link" href="/blog"><i class="fas fa-globe me-2"></i>View Site</a>
+                    <a class="nav-link" href="/dashboard"><i class="fas fa-user me-2"></i>User Dashboard</a>
+                    <a class="nav-link" href="/auth/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+                </nav>
+            </div>
+        </div>
+            
+            <div class="row">
+                <!-- Sidebar (Desktop) -->
+                <div class="col-md-3 col-lg-2 sidebar p-0 d-none d-md-block" role="complementary" aria-label="Sidebar">
+                    <div class="p-3">
+                        <h4 class="text-white mb-4">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            Admin Panel
+                        </h4>
+                        <nav class="nav flex-column" role="navigation" aria-label="Admin navigation">
+                            <a class="nav-link active" href="#overview" data-section="overview"><i class="fas fa-chart-line me-2"></i>Overview</a>
+                            <a class="nav-link" href="#users" data-section="users"><i class="fas fa-users me-2"></i>User Management</a>
+                            <a class="nav-link" href="#content" data-section="content"><i class="fas fa-newspaper me-2"></i>Content Moderation</a>
+                            <a class="nav-link" href="#subscriptions" data-section="subscriptions"><i class="fas fa-crown me-2"></i>Subscriptions</a>
+                            <a class="nav-link" href="#analytics" data-section="analytics"><i class="fas fa-chart-bar me-2"></i>Analytics</a>
+                            <a class="nav-link" href="#settings" data-section="settings"><i class="fas fa-cog me-2"></i>System Settings</a>
+                            <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
+                            <a class="nav-link" href="/blog"><i class="fas fa-globe me-2"></i>View Site</a>
+                            <a class="nav-link" href="/dashboard"><i class="fas fa-user me-2"></i>User Dashboard</a>
+                            <a class="nav-link" href="/auth/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+                        </nav>
+                    </div>
+                </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10" id="main-content" role="main" tabindex="-1">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center py-3 px-4 bg-white shadow-sm">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-secondary d-md-none me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminMobileSidebar" aria-controls="adminMobileSidebar">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <div>
+                            <h2 class="mb-0">Admin Dashboard</h2>
+                            <small class="text-muted">Kelola platform dan monitor aktivitas</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="adminPeriodMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-calendar me-2"></i>
+                                <span id="periodSelector">30 Hari Terakhir</span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="adminPeriodMenu" role="menu">
+                                <li><a class="dropdown-item" href="#" data-period="7d">7 Hari Terakhir</a></li>
+                                <li><a class="dropdown-item" href="#" data-period="30d">30 Hari Terakhir</a></li>
+                                <li><a class="dropdown-item" href="#" data-period="90d">90 Hari Terakhir</a></li>
+                                <li><a class="dropdown-item" href="#" data-period="1y">1 Tahun Terakhir</a></li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-primary" onclick="refreshData()">
+                            <i class="fas fa-sync-alt me-2"></i>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Content Sections -->
+                <div class="p-4">
+                    <!-- Overview Section -->
+                    <div id="overview-section" class="content-section">
+                        <!-- Statistics Cards -->
+                        <div class="row mb-4">
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="stat-card users">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="stat-number text-primary" id="totalUsers">-</div>
+                                            <div class="stat-label">Total Users</div>
+                                        </div>
+                                        <i class="fas fa-users fa-2x text-primary opacity-25"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="stat-card articles">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="stat-number text-success" id="totalArticles">-</div>
+                                            <div class="stat-label">Total Articles</div>
+                                        </div>
+                                        <i class="fas fa-newspaper fa-2x text-success opacity-25"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="stat-card revenue">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="stat-number text-warning" id="totalRevenue">-</div>
+                                            <div class="stat-label">Total Revenue</div>
+                                        </div>
+                                        <i class="fas fa-dollar-sign fa-2x text-warning opacity-25"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="stat-card subscriptions">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="stat-number text-danger" id="activeSubscriptions">-</div>
+                                            <div class="stat-label">Active Subscriptions</div>
+                                        </div>
+                                        <i class="fas fa-crown fa-2x text-danger opacity-25"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Charts Row -->
+                        <div class="row mb-4">
+                            <div class="col-lg-8 mb-3">
+                                <div class="chart-container">
+                                    <h5 class="mb-3">Platform Growth</h5>
+                                    <canvas id="growthChart" height="100"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 mb-3">
+                                <div class="chart-container">
+                                    <h5 class="mb-3">System Alerts</h5>
+                                    <div id="systemAlerts">
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-spinner fa-spin text-muted"></i>
+                                            <p class="text-muted mt-2">Loading alerts...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Recent Activity -->
+                        <div class="row">
+                            <div class="col-lg-6 mb-3">
+                                <div class="chart-container">
+                                    <h5 class="mb-3">Recent Users</h5>
+                                    <div id="recentUsers">Loading...</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="chart-container">
+                                    <h5 class="mb-3">Recent Articles</h5>
+                                    <div id="recentArticles">Loading...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Users Section -->
+                    <div id="users-section" class="content-section d-none">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3>User Management</h3>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-primary" onclick="exportUsers()">
+                                    <i class="fas fa-download me-2"></i>
+                                    Export
+                                </button>
+                                <button class="btn btn-primary" onclick="showAddUserModal()">
+                                    <i class="fas fa-plus me-2"></i>
+                                    Add User
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table id="usersTable" class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Subscription</th>
+                                        <th>Status</th>
+                                        <th>Joined</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Data will be loaded via AJAX -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Content Moderation Section -->
+                    <div id="content-section" class="content-section d-none">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3>Content Moderation</h3>
+                            <div class="d-flex gap-2">
+                                <select class="form-select" id="contentFilter">
+                                    <option value="all">All Content</option>
+                                    <option value="pending">Pending Review</option>
+                                    <option value="flagged">Flagged Content</option>
+                                    <option value="published">Published</option>
+                                    <option value="draft">Draft</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table id="contentTable" class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Author</th>
+                                        <th>Category</th>
+                                        <th>Status</th>
+                                        <th>Views</th>
+                                        <th>Comments</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Data will be loaded via AJAX -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Subscriptions Section -->
+                    <div id="subscriptions-section" class="content-section d-none">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3>Subscription Management</h3>
+                            <button class="btn btn-primary" onclick="showSubscriptionStats()">
+                                <i class="fas fa-chart-pie me-2"></i>
+                                View Stats
+                            </button>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="stat-card">
+                                    <div class="stat-number text-success" id="freeUsers">-</div>
+                                    <div class="stat-label">Free Users</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="stat-card">
+                                    <div class="stat-number text-primary" id="basicUsers">-</div>
+                                    <div class="stat-label">Basic Users</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="stat-card">
+                                    <div class="stat-number text-warning" id="proUsers">-</div>
+                                    <div class="stat-label">Pro Users</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="stat-card">
+                                    <div class="stat-number text-danger" id="enterpriseUsers">-</div>
+                                    <div class="stat-label">Enterprise Users</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table id="subscriptionsTable" class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Plan</th>
+                                        <th>Status</th>
+                                        <th>Amount</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Data will be loaded via AJAX -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Analytics Section -->
+                    <div id="analytics-section" class="content-section d-none">
+                        <h3 class="mb-4">Advanced Analytics</h3>
+                        
+                        <div class="row mb-4">
+                            <div class="col-lg-6 mb-3">
+                                <div class="chart-container">
+                                    <h5 class="mb-3">User Engagement</h5>
+                                    <canvas id="engagementChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="chart-container">
+                                    <h5 class="mb-3">Revenue Trends</h5>
+                                    <canvas id="revenueChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-lg-8 mb-3">
+                                <div class="chart-container">
+                                    <h5 class="mb-3">Content Performance</h5>
+                                    <canvas id="contentPerformanceChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 mb-3">
+                                <div class="chart-container">
+                                    <h5 class="mb-3">Top Categories</h5>
+                                    <canvas id="categoriesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings Section -->
+                    <div id="settings-section" class="content-section d-none">
+                        <h3 class="mb-4">System Settings</h3>
+                        
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="chart-container">
+                                    <h5 class="mb-3">General Settings</h5>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Site Name</label>
+                                        <input type="text" class="form-control" value="Blog Platform">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Site Description</label>
+                                        <textarea class="form-control" rows="3">Modern blog platform with AI integration</textarea>
+                                    </div>
+                                    
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="allowRegistration" checked>
+                                        <label class="form-check-label" for="allowRegistration">
+                                            Allow User Registration
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="moderateComments">
+                                        <label class="form-check-label" for="moderateComments">
+                                            Moderate Comments
+                                        </label>
+                                    </div>
+                                    
+                                    <button class="btn btn-primary">Save Settings</button>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-6">
+                                <div class="chart-container">
+                                    <h5 class="mb-3">System Status</h5>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                                        <div>
+                                            <strong>Database</strong>
+                                            <div class="text-muted small">MongoDB Connection</div>
+                                        </div>
+                                        <span class="badge bg-success">Connected</span>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                                        <div>
+                                            <strong>Redis Cache</strong>
+                                            <div class="text-muted small">Session Storage</div>
+                                        </div>
+                                        <span class="badge bg-success">Active</span>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                                        <div>
+                                            <strong>Email Service</strong>
+                                            <div class="text-muted small">SMTP Configuration</div>
+                                        </div>
+                                        <span class="badge bg-warning">Testing</span>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                                        <div>
+                                            <strong>AI Services</strong>
+                                            <div class="text-muted small">OpenAI Integration</div>
+                                        </div>
+                                        <span class="badge bg-success">Active</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables -->
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentPeriod = '30d';
+        let dashboardData = null;
+        let growthChart = null;
+        let usersTable = null;
+        let contentTable = null;
+        let subscriptionsTable = null;
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            setupEventListeners();
+            initializeTables();
+        });
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Navigation
+            document.querySelectorAll('.nav-link[data-section]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showSection(this.dataset.section);
+                    
+                    // Update active nav
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Period selector
+            document.querySelectorAll('[data-period]').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    currentPeriod = this.dataset.period;
+                    document.getElementById('periodSelector').textContent = this.textContent;
+                    loadDashboardData();
+                });
+            });
+            
+            // Content filter
+            document.getElementById('contentFilter').addEventListener('change', function() {
+                if (contentTable) {
+                    contentTable.ajax.reload();
+                }
+            });
+        }
+        
+        // Show section
+        function showSection(sectionName) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.add('d-none');
+            });
+            document.getElementById(sectionName + '-section').classList.remove('d-none');
+            
+            // Load section-specific data
+            switch(sectionName) {
+                case 'users':
+                    if (usersTable) usersTable.ajax.reload();
+                    break;
+                case 'content':
+                    if (contentTable) contentTable.ajax.reload();
+                    break;
+                case 'subscriptions':
+                    if (subscriptionsTable) subscriptionsTable.ajax.reload();
+                    loadSubscriptionStats();
+                    break;
+                case 'analytics':
+                    loadAdvancedAnalytics();
+                    break;
+            }
+        }
+        
+        // Initialize DataTables
+        function initializeTables() {
+            // Users table
+            usersTable = $('#usersTable').DataTable({
+                ajax: {
+                    url: '/api/admin/users',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                },
+                columns: [
+                    {
+                        data: null,
+                        render: function(data, type, row) {
+                            return `
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        ${row.profile.avatar ? 
+                                            `<img src="${row.profile.avatar}" class="rounded-circle" width="40" height="40">` :
+                                            `<div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">${(row.profile.nama || row.username).charAt(0).toUpperCase()}</div>`
+                                        }
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">${row.profile.nama || row.username}</div>
+                                        <div class="text-muted small">@${row.username}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    },
+                    { data: 'email' },
+                    {
+                        data: 'role',
+                        render: function(data) {
+                            const colors = { admin: 'danger', moderator: 'warning', user: 'primary' };
+                            return `<span class="badge bg-${colors[data] || 'secondary'}">${data}</span>`;
+                        }
+                    },
+                    {
+                        data: 'subscription.plan',
+                        render: function(data) {
+                            return data ? `<span class="badge bg-info">${data}</span>` : '<span class="text-muted">None</span>';
+                        }
+                    },
+                    {
+                        data: 'isActive',
+                        render: function(data) {
+                            return data ? 
+                                '<span class="badge bg-success">Active</span>' : 
+                                '<span class="badge bg-danger">Inactive</span>';
+                        }
+                    },
+                    {
+                        data: 'createdAt',
+                        render: function(data) {
+                            return new Date(data).toLocaleDateString('id-ID');
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function(data, type, row) {
+                            return `
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editUser('${row._id}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-${row.isActive ? 'warning' : 'success'}" onclick="toggleUserStatus('${row._id}')">
+                                        <i class="fas fa-${row.isActive ? 'ban' : 'check'}"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${row._id}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    }
+                ],
+                responsive: true,
+                pageLength: 25
+            });
+            
+            // Content table
+            contentTable = $('#contentTable').DataTable({
+                ajax: {
+                    url: '/api/admin/articles',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
+                    data: function(d) {
+                        d.status = document.getElementById('contentFilter').value;
+                    }
+                },
+                columns: [
+                    {
+                        data: 'judul',
+                        render: function(data, type, row) {
+                            return `<a href="/blog/${row.slug}" target="_blank">${data}</a>`;
+                        }
+                    },
+                    {
+                        data: 'author',
+                        render: function(data) {
+                            return data.profile.nama || data.username;
+                        }
+                    },
+                    {
+                        data: 'kategori',
+                        render: function(data) {
+                            return data ? data.nama : '<span class="text-muted">Uncategorized</span>';
+                        }
+                    },
+                    {
+                        data: 'status',
+                        render: function(data) {
+                            const colors = { published: 'success', draft: 'warning', pending: 'info' };
+                            return `<span class="badge bg-${colors[data] || 'secondary'}">${data}</span>`;
+                        }
+                    },
+                    { data: 'views', defaultContent: '0' },
+                    { data: 'commentCount', defaultContent: '0' },
+                    {
+                        data: 'createdAt',
+                        render: function(data) {
+                            return new Date(data).toLocaleDateString('id-ID');
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function(data, type, row) {
+                            return `
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editArticle('${row._id}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-success" onclick="approveArticle('${row._id}')">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteArticle('${row._id}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    }
+                ],
+                responsive: true,
+                pageLength: 25
+            });
+            
+            // Subscriptions table
+            subscriptionsTable = $('#subscriptionsTable').DataTable({
+                ajax: {
+                    url: '/api/admin/subscriptions',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                },
+                columns: [
+                    {
+                        data: 'user',
+                        render: function(data) {
+                            return data.profile.nama || data.username;
+                        }
+                    },
+                    {
+                        data: 'subscription',
+                        render: function(data) {
+                            return data.name;
+                        }
+                    },
+                    {
+                        data: 'status',
+                        render: function(data) {
+                            const colors = { active: 'success', trial: 'info', cancelled: 'danger', expired: 'warning' };
+                            return `<span class="badge bg-${colors[data] || 'secondary'}">${data}</span>`;
+                        }
+                    },
+                    {
+                        data: 'payment.amount',
+                        render: function(data, type, row) {
+                            return `Rp ${data.toLocaleString('id-ID')}`;
+                        }
+                    },
+                    {
+                        data: 'startDate',
+                        render: function(data) {
+                            return new Date(data).toLocaleDateString('id-ID');
+                        }
+                    },
+                    {
+                        data: 'endDate',
+                        render: function(data) {
+                            return new Date(data).toLocaleDateString('id-ID');
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function(data, type, row) {
+                            return `
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewSubscription('${row._id}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning" onclick="cancelSubscription('${row._id}')">
+                                        <i class="fas fa-ban"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    }
+                ],
+                responsive: true,
+                pageLength: 25
+            });
+        }
+        
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                const response = await fetch(`/api/dashboard/admin?period=${currentPeriod}`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    dashboardData = data.data;
+                    updateDashboard();
+                } else {
+                    console.error('Failed to load dashboard data:', data.error);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+        
+        // Update dashboard
+        function updateDashboard() {
+            if (!dashboardData) return;
+            
+            // Update statistics
+            document.getElementById('totalUsers').textContent = dashboardData.summary.totalUsers.toLocaleString();
+            document.getElementById('totalArticles').textContent = dashboardData.summary.totalArticles.toLocaleString();
+            document.getElementById('totalRevenue').textContent = 'Rp ' + dashboardData.summary.subscriptions.revenue.toLocaleString('id-ID');
+            document.getElementById('activeSubscriptions').textContent = dashboardData.summary.subscriptions.active.toLocaleString();
+            
+            // Update charts
+            updateGrowthChart();
+            updateSystemAlerts();
+            updateRecentActivity();
+        }
+        
+        // Update growth chart
+        function updateGrowthChart() {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            
+            if (growthChart) {
+                growthChart.destroy();
+            }
+            
+            growthChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dashboardData.charts.userGrowth.map(item => item.date),
+                    datasets: [
+                        {
+                            label: 'New Users',
+                            data: dashboardData.charts.userGrowth.map(item => item.newUsers),
+                            borderColor: '#007bff',
+                            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'New Articles',
+                            data: dashboardData.charts.articleGrowth.map(item => item.newArticles),
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update system alerts
+        function updateSystemAlerts() {
+            const container = document.getElementById('systemAlerts');
+            
+            const alerts = [
+                { level: 'high', message: 'Server CPU usage above 80%', time: '5 min ago' },
+                { level: 'medium', message: 'New user registrations spike', time: '1 hour ago' },
+                { level: 'low', message: 'Backup completed successfully', time: '2 hours ago' }
+            ];
+            
+            container.innerHTML = alerts.map(alert => `
+                <div class="alert-item ${alert.level}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">${alert.message}</div>
+                            <div class="text-muted small">${alert.time}</div>
+                        </div>
+                        <i class="fas fa-${alert.level === 'high' ? 'exclamation-triangle' : alert.level === 'medium' ? 'exclamation-circle' : 'info-circle'}"></i>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Update recent activity
+        function updateRecentActivity() {
+            // Update recent users
+            const recentUsersContainer = document.getElementById('recentUsers');
+            // Implementation for recent users
+            
+            // Update recent articles
+            const recentArticlesContainer = document.getElementById('recentArticles');
+            // Implementation for recent articles
+        }
+        
+        // Utility functions
+        function refreshData() {
+            loadDashboardData();
+            if (usersTable) usersTable.ajax.reload();
+            if (contentTable) contentTable.ajax.reload();
+            if (subscriptionsTable) subscriptionsTable.ajax.reload();
+        }
+        
+        function editUser(userId) {
+            // Implementation for editing user
+            console.log('Edit user:', userId);
+        }
+        
+        function toggleUserStatus(userId) {
+            // Implementation for toggling user status
+            console.log('Toggle user status:', userId);
+        }
+        
+        function deleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                // Implementation for deleting user
+                console.log('Delete user:', userId);
+            }
+        }
+        
+        function editArticle(articleId) {
+            window.open(`/articles/edit/${articleId}`, '_blank');
+        }
+        
+        function approveArticle(articleId) {
+            // Implementation for approving article
+            console.log('Approve article:', articleId);
+        }
+        
+        function deleteArticle(articleId) {
+            if (confirm('Are you sure you want to delete this article?')) {
+                // Implementation for deleting article
+                console.log('Delete article:', articleId);
+            }
+        }
+        
+        function loadSubscriptionStats() {
+            // Load subscription statistics
+            console.log('Loading subscription stats...');
+        }
+        
+        function loadAdvancedAnalytics() {
+            // Load advanced analytics charts
+            console.log('Loading advanced analytics...');
+        }
+    </script>
+</body>
+</html>
